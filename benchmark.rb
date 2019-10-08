@@ -14,7 +14,7 @@ Benchmark.ips do |bench|
     caller(1, 1).first
   end
   bench.report("caller_locations(1, 1)") do
-    caller_locations(1).first.path
+    caller_locations(1, 1).first.path
   end
   bench.report("stack_frames caller frame") do
     buffer = STACK_FRAMES_CALLER_BUFFER
