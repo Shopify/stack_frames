@@ -7,3 +7,8 @@
 /spec/reports/
 /tmp/
 /Gemfile.lock
+*.bundle
+*.o
+*.so
+/ext/*/Makefile
+*.gem
