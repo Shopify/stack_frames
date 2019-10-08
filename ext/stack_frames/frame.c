@@ -21,9 +21,7 @@ static size_t frame_memsize(const void *ptr)
 const rb_data_type_t frame_data_type = {
     "stack_frames_frame",
     { frame_mark, frame_free, frame_memsize, },
-#if defined(RUBY_TYPED_FREE_IMMEDIATELY)
     NULL, NULL, RUBY_TYPED_FREE_IMMEDIATELY
-#endif
 };
 
 VALUE frame_new(VALUE frame_buffer, int index) {

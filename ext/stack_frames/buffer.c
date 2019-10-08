@@ -29,9 +29,7 @@ static size_t buffer_memsize(const void *ptr)
 const rb_data_type_t buffer_data_type = {
     "stack_frames_buffer",
     { buffer_mark, buffer_free, buffer_memsize, },
-#if defined(RUBY_TYPED_FREE_IMMEDIATELY)
     NULL, NULL, RUBY_TYPED_FREE_IMMEDIATELY
-#endif
 };
 
 static VALUE buffer_allocate(VALUE klass) {
