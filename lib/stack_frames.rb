@@ -1,6 +1,8 @@
-require "stack_frames/version"
+# frozen_string_literal: true
 
-module StackFrames
-  class Error < StandardError; end
-  # Your code goes here...
+require 'stack_frames/version'
+require 'stack_frames/stack_frames'
+
+StackFrames::Frame.singleton_class.class_eval do
+  private(:new)
 end
