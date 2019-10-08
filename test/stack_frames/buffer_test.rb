@@ -9,6 +9,13 @@ class StackFrames::BufferTest < Minitest::Test
     buffer.each { flunk("unexpected yield") }
   end
 
+  def test_new_with_invalid_capacity
+    [-1, 0].each do |invalid_capacity|
+      exc = assert_raises(ArgumentError) { StackFrames::Buffer.new(invalid_capacity) }
+      assert_equal("non-positive buffer capacity", exc.message)
+    end
+  end
+
   def test_capture
     buffer = StackFrames::Buffer.new(1)
     expected_line = __LINE__ + 1

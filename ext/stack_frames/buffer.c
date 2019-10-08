@@ -45,7 +45,7 @@ static VALUE buffer_initialize(VALUE self, VALUE size) {
     buffer_t *buffer;
 
     if (capacity <= 0) {
-        rb_raise(rb_eArgError, "negative buffer capacity");
+        rb_raise(rb_eArgError, "non-positive buffer capacity");
     }
 
     TypedData_Get_Struct(self, buffer_t, &buffer_data_type, buffer);
