@@ -1,6 +1,13 @@
 #include "buffer.h"
 #include "frame.h"
 
+typedef struct {
+    VALUE *profile_frames;
+    VALUE *frames;
+    int *lines;
+    int length, capacity;
+} buffer_t;
+
 static void buffer_mark(void *ptr)
 {
     buffer_t *buffer = ptr;
@@ -55,7 +62,7 @@ static VALUE buffer_initialize(VALUE self, VALUE size) {
     buffer->frames = ALLOC_N(VALUE, capacity);
 
     for (int i = 0; i < capacity; i++) {
-        buffer->frames[i] = frame_new(self, i);
+        buffer->frames[i] = stack_frame_new(self, i);
     }
     return Qnil;
 }
@@ -103,19 +110,19 @@ static VALUE buffer_each(VALUE self) {
     return Qnil;
 }
 
-VALUE buffer_profile_frame(VALUE buffer_obj, int index) {
+VALUE stack_buffer_profile_frame(VALUE buffer_obj, int index) {
     buffer_t *buffer;
     TypedData_Get_Struct(buffer_obj, buffer_t, &buffer_data_type, buffer);
     return buffer->profile_frames[index];
 }
 
-int buffer_frame_lineno(VALUE buffer_obj, int index) {
+int stack_buffer_frame_lineno(VALUE buffer_obj, int index) {
     buffer_t *buffer;
     TypedData_Get_Struct(buffer_obj, buffer_t, &buffer_data_type, buffer);
     return buffer->lines[index];
 }
 
-void init_buffer(VALUE mStackFrames) {
+void stack_buffer_define(VALUE mStackFrames) {
     VALUE cBuffer = rb_define_class_under(mStackFrames, "Buffer", rb_cObject);
     rb_define_alloc_func(cBuffer, buffer_allocate);
     rb_define_method(cBuffer, "initialize", buffer_initialize, 1);

@@ -6,6 +6,6 @@ VALUE mStackFrames;
 
 void Init_stack_frames() {
     mStackFrames = rb_define_module("StackFrames");
-    init_buffer(mStackFrames);
-    init_frame(mStackFrames);
+    stack_buffer_define(mStackFrames);
+    stack_frame_define(mStackFrames);
 }
