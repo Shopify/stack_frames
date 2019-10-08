@@ -49,10 +49,10 @@ static VALUE buffer_initialize(VALUE self, VALUE size) {
     }
 
     TypedData_Get_Struct(self, buffer_t, &buffer_data_type, buffer);
-    buffer->profile_frames = ruby_xmalloc(sizeof(VALUE) * capacity);
-    buffer->lines = ruby_xmalloc(sizeof(int) * capacity);
+    buffer->profile_frames = ALLOC_N(VALUE, capacity);
+    buffer->lines = ALLOC_N(int, capacity);
     buffer->capacity = capacity;
-    buffer->frames = ruby_xmalloc(sizeof(VALUE) * capacity);
+    buffer->frames = ALLOC_N(VALUE, capacity);
 
     for (int i = 0; i < capacity; i++) {
         buffer->frames[i] = frame_new(self, i);
