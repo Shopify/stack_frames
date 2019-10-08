@@ -21,7 +21,7 @@ Or install it yourself as:
 
 ## Usage
 
-Pre-allocate a buffer to use for capturing the stack stack frames, then re-use that buffer
+Pre-allocate a buffer to use for capturing stack frames, then re-use that buffer
 to capture the backtrace multiple times.
 
 ```ruby
