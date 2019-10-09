@@ -1,8 +1,7 @@
 # StackFrames
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/stack_frames`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
+This library allows backtraces to be captured and accessed without
+object allocations by leveraging MRI's profile frames API.
 
 ## Installation
 
@@ -22,7 +21,36 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+Pre-allocate a buffer to use for capturing stack frames, then re-use that buffer
+to capture the backtrace multiple times.
+
+```ruby
+# example.rb
+require 'stack_frames'
+
+STACK_FRAMES_BUFFER = StackFrames::Buffer.new(2)
+CAPTURE_CALLER = -> { STACK_FRAMES_BUFFER.capture }
+
+def foo(&block)
+  yield
+end
+
+foo(&CAPTURE_CALLER)
+caller_frame = STACK_FRAMES_BUFFER[1]
+p caller_frame.path # => "example.rb"
+p caller_frame.lineno # => 14
+p caller_frame.method_name # => "foo"
+puts
+
+CAPTURE_CALLER.call
+p caller_frame.path # => "example.rb"
+p caller_frame.lineno # => 18
+p caller_frame.method_name # => nil
+```
+
+If stack frames need to be captured in multiple threads, then access
+to the buffer can either be synchronized using a Mutex or a per-thread
+buffer could be created and stored in a thread-local variable.
 
 ## Development
 
@@ -32,7 +60,7 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/dylanahsmith/stack_frames.
+Bug reports and pull requests are welcome on GitHub at https://github.com/Shopify/stack_frames.
 
 ## License
 

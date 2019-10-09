@@ -1,7 +1,12 @@
 require "bundler/gem_tasks"
 require "rake/testtask"
+require 'rake/extensiontask'
 
-Rake::TestTask.new(:test) do |t|
+Rake::ExtensionTask.new("stack_frames") do |ext|
+  ext.lib_dir = 'lib/stack_frames'
+end
+
+Rake::TestTask.new(test: :compile) do |t|
   t.libs << "test"
   t.libs << "lib"
   t.test_files = FileList["test/**/*_test.rb"]
