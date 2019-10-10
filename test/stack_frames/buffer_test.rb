@@ -68,19 +68,32 @@ class StackFrames::BufferTest < Minitest::Test
     assert_nil(buffer[buffer.length])
   end
 
+  def test_each
+    buffer = StackFrames::Buffer.new(10)
+    frame2 do
+      frame1 do
+        buffer.capture
+      end
+    end
+    i = 0
+    buffer.each do |frame|
+      assert_same(frame, buffer[i])
+      i += 1
+    end
+    assert_equal(buffer.length, i)
+  end
+
   private
 
   def frame1
     yield
   end
 
-  def count_allocations(&block)
-    StackProf.run(mode: :object, &block)[:samples]
+  def frame2
+    yield
   end
 
-  def buffer_frames(buffer)
-    frames = []
-    buffer.each { |frame| frames << frame }
-    frames
+  def count_allocations(&block)
+    StackProf.run(mode: :object, &block)[:samples]
   end
 end
