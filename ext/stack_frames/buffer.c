@@ -94,7 +94,7 @@ static VALUE buffer_aref(VALUE self, VALUE ruby_index) {
     int index = NUM2INT(ruby_index);
 
     TypedData_Get_Struct(self, buffer_t, &buffer_data_type, buffer);
-    if (index < buffer->length) {
+    if (index >= 0 && index < buffer->length) {
         return buffer->frames[index];
     }
     return Qnil;

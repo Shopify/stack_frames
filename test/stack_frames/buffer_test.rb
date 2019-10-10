@@ -49,15 +49,51 @@ class StackFrames::BufferTest < Minitest::Test
     assert_equal(__FILE__, got_path)
   end
 
+  def test_index_lookup
+    buffer = StackFrames::Buffer.new(10)
+    capture_lineno = __LINE__ + 2
+    frame1 do
+      buffer.capture
+    end
+    [
+      ["test_index_lookup", capture_lineno],
+      ["frame1", method(:frame1).source_location[1] + 1],
+      ["test_index_lookup", capture_lineno - 1],
+    ].each_with_index do |(method_name, lineno), i|
+      frame = buffer[i]
+      assert_equal(method_name, frame.method_name, "frame #{i}")
+      assert_equal(lineno, frame.lineno, "frame #{i}")
+    end
+    assert_nil(buffer[-1])
+    assert_nil(buffer[buffer.length])
+  end
+
+  def test_each
+    buffer = StackFrames::Buffer.new(10)
+    frame2 do
+      frame1 do
+        buffer.capture
+      end
+    end
+    i = 0
+    buffer.each do |frame|
+      assert_same(frame, buffer[i])
+      i += 1
+    end
+    assert_equal(buffer.length, i)
+  end
+
   private
+
+  def frame1
+    yield
+  end
+
+  def frame2
+    yield
+  end
 
   def count_allocations(&block)
     StackProf.run(mode: :object, &block)[:samples]
-  end
-
-  def buffer_frames(buffer)
-    frames = []
-    buffer.each { |frame| frames << frame }
-    frames
   end
 end
