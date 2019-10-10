@@ -110,6 +110,19 @@ static VALUE buffer_each(VALUE self) {
     return Qnil;
 }
 
+static VALUE buffer_find(VALUE self) {
+    buffer_t *buffer;
+
+    TypedData_Get_Struct(self, buffer_t, &buffer_data_type, buffer);
+    for (int i = 0; i < buffer->length; i++) {
+        VALUE frame = buffer->frames[i];
+        if (RTEST(rb_yield(frame))) {
+            return frame;
+        }
+    }
+    return Qnil;
+}
+
 VALUE stack_buffer_profile_frame(VALUE buffer_obj, int index) {
     buffer_t *buffer;
     TypedData_Get_Struct(buffer_obj, buffer_t, &buffer_data_type, buffer);
@@ -129,6 +142,7 @@ void stack_buffer_define(VALUE mStackFrames) {
     rb_define_method(cBuffer, "length", buffer_length, 0);
     rb_define_method(cBuffer, "capacity", buffer_capacity, 0);
     rb_define_method(cBuffer, "capture", buffer_capture, 0);
-    rb_define_method(cBuffer, "each", buffer_each, 0);
     rb_define_method(cBuffer, "[]", buffer_aref, 1);
+    rb_define_method(cBuffer, "each", buffer_each, 0);
+    rb_define_method(cBuffer, "find", buffer_find, 0);
 }
