@@ -83,6 +83,21 @@ class StackFrames::BufferTest < Minitest::Test
     assert_equal(buffer.length, i)
   end
 
+  def test_find
+    buffer = StackFrames::Buffer.new(10)
+    frame2 do
+      frame1 do
+        buffer.capture
+      end
+    end
+    frame = buffer.find { |frame| frame.method_name == "frame2" }
+    assert_equal(method(:frame2).source_location[1] + 1, frame.lineno)
+
+    assert_same(buffer[0], buffer.find { |frame| true })
+
+    assert_nil(buffer.find { |frame| false })
+  end
+
   private
 
   def frame1
