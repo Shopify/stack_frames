@@ -46,6 +46,9 @@ CAPTURE_CALLER.call
 p caller_frame.path # => "example.rb"
 p caller_frame.lineno # => 18
 p caller_frame.method_name # => nil
+
+# You can also search through the captured stack frames:
+STACK_FRAMES_BUFFER.find { |frame| frame.path == "example.rb" } # => [the matching stack frame object]
 ```
 
 If stack frames need to be captured in multiple threads, then access
