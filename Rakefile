@@ -2,6 +2,8 @@ require "bundler/gem_tasks"
 require "rake/testtask"
 require 'rake/extensiontask'
 
+ENV['STACK_FRAMES_DEV'] = '1'
+
 Rake::ExtensionTask.new("stack_frames") do |ext|
   ext.lib_dir = 'lib/stack_frames'
 end
