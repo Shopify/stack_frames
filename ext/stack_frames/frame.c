@@ -72,6 +72,8 @@ DEFINE_FRAME_ACCESSOR(qualified_method_name)
 
 void stack_frame_define(VALUE mStackFrames) {
     cFrame = rb_define_class_under(mStackFrames, "Frame", rb_cObject);
+    rb_global_variable(&cFrame);
+
     rb_define_alloc_func(cFrame, frame_allocate);
     rb_define_method(cFrame, "lineno", frame_lineno, 0);
     rb_define_method(cFrame, "path", frame_path, 0);
