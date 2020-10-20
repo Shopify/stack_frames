@@ -58,11 +58,12 @@ static VALUE buffer_initialize(VALUE self, VALUE size) {
     TypedData_Get_Struct(self, buffer_t, &buffer_data_type, buffer);
     buffer->profile_frames = ALLOC_N(VALUE, capacity);
     buffer->lines = ALLOC_N(int, capacity);
-    buffer->capacity = capacity;
     buffer->frames = ALLOC_N(VALUE, capacity);
 
+    buffer->capacity = 0;
     for (int i = 0; i < capacity; i++) {
         buffer->frames[i] = stack_frame_new(self, i);
+        buffer->capacity++;
     }
     return Qnil;
 }

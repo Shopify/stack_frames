@@ -98,6 +98,13 @@ class StackFrames::BufferTest < Minitest::Test
     assert_nil(buffer.find { |frame| false })
   end
 
+  def test_gc_stress
+    GC.stress = true
+    StackFrames::Buffer.new(10)
+  ensure
+    GC.stress = false
+  end
+
   private
 
   def frame1
