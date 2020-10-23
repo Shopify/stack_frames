@@ -5,4 +5,5 @@ cache: bundler
 rvm:
   - 2.4.9 # minimum supported
   - 2.7.0 # latest released
-before_install: gem install bundler -v 1.17.3
+  - ruby-head
+script: rake
