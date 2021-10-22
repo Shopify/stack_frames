@@ -36,13 +36,15 @@ class StackFrames::BufferTest < Minitest::Test
     got_path = nil
     got_lineno = nil
     got_method_name = nil
-    num_allocations = count_allocations do
+    instrumented_code = lambda do
       buffer.capture
       frame = buffer[1]
       got_path = frame.path
       got_lineno = frame.lineno
       got_method_name = frame.method_name
     end
+    count_allocations(&instrumented_code) # allow lazy memoized allocations
+    num_allocations = count_allocations(&instrumented_code)
     assert_equal(0, num_allocations)
     assert_equal('count_allocations', got_method_name)
     assert_equal(method(:count_allocations).source_location[1] + 1, got_lineno)
