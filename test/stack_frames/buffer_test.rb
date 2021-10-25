@@ -17,11 +17,11 @@ class StackFrames::BufferTest < Minitest::Test
   end
 
   def test_capture
-    buffer = StackFrames::Buffer.new(1)
+    buffer = StackFrames::Buffer.new(2)
     expected_line = __LINE__ + 1
     frames_length = buffer.capture
-    assert_equal(1, frames_length)
-    frame = buffer[0]
+    assert_equal(2, frames_length)
+    frame = buffer[skipping_c_frames? ? 0 : 1]
     assert_equal('test_capture', frame.method_name)
     assert_equal(true, frame.method_name.frozen?)
     assert_equal(__FILE__, frame.path)
@@ -36,13 +36,16 @@ class StackFrames::BufferTest < Minitest::Test
     got_path = nil
     got_lineno = nil
     got_method_name = nil
-    num_allocations = count_allocations do
+    frame_index = skipping_c_frames? ? 1 : 3
+    instrumented_code = lambda do
       buffer.capture
-      frame = buffer[1]
+      frame = buffer[frame_index]
       got_path = frame.path
       got_lineno = frame.lineno
       got_method_name = frame.method_name
     end
+    count_allocations(&instrumented_code) # allow lazy memoized allocations
+    num_allocations = count_allocations(&instrumented_code)
     assert_equal(0, num_allocations)
     assert_equal('count_allocations', got_method_name)
     assert_equal(method(:count_allocations).source_location[1] + 1, got_lineno)
@@ -55,12 +58,19 @@ class StackFrames::BufferTest < Minitest::Test
     frame1 do
       buffer.capture
     end
+    skipped = 0
     [
-      ["test_index_lookup", capture_lineno],
-      ["frame1", method(:frame1).source_location[1] + 1],
-      ["test_index_lookup", capture_lineno - 1],
-    ].each_with_index do |(method_name, lineno), i|
-      frame = buffer[i]
+      [:c, "capture", 0],
+      [:ruby, "test_index_lookup", capture_lineno],
+      [:ruby, "frame1", method(:frame1).source_location[1] + 1],
+      [:ruby, "test_index_lookup", capture_lineno - 1],
+    ].each_with_index do |(lang, method_name, lineno), i|
+      if skipping_c_frames? && lang == :c
+        skipped += 1
+        next
+      end
+      buffer_idx = i - skipped
+      frame = buffer[buffer_idx]
       assert_equal(method_name, frame.method_name, "frame #{i}")
       assert_equal(lineno, frame.lineno, "frame #{i}")
     end
@@ -106,6 +116,10 @@ class StackFrames::BufferTest < Minitest::Test
   end
 
   private
+
+  def skipping_c_frames?
+    Gem::Version.new(RUBY_VERSION) < Gem::Version.new("3")
+  end
 
   def frame1
     yield
