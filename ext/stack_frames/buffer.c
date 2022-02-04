@@ -11,12 +11,17 @@ typedef struct {
 static void buffer_mark(void *ptr)
 {
     buffer_t *buffer = ptr;
+    VALUE frame;
 
     for (int i = 0; i < buffer->length; i++) {
-        rb_gc_mark(buffer->profile_frames[i]);
+        if (RTEST(frame = buffer->profile_frames[i])) {
+            rb_gc_mark(frame);
+        }
     }
     for (int i = 0; i < buffer->capacity; i++) {
-        rb_gc_mark(buffer->frames[i]);
+        if (RTEST(frame = buffer->frames[i])) {
+            rb_gc_mark(frame);
+        }
     }
 }
 
@@ -56,11 +61,14 @@ static VALUE buffer_initialize(VALUE self, VALUE size) {
     }
 
     TypedData_Get_Struct(self, buffer_t, &buffer_data_type, buffer);
-    buffer->profile_frames = ALLOC_N(VALUE, capacity);
-    buffer->lines = ALLOC_N(int, capacity);
-    buffer->frames = ALLOC_N(VALUE, capacity);
 
     buffer->capacity = 0;
+    buffer->length = 0;
+
+    buffer->lines = ALLOC_N(int, capacity);
+    buffer->profile_frames = ZALLOC_N(VALUE, capacity);
+    buffer->frames = ZALLOC_N(VALUE, capacity);
+
     for (int i = 0; i < capacity; i++) {
         buffer->frames[i] = stack_frame_new(self, i);
         buffer->capacity++;
