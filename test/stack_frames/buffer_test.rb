@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require "test_helper"
 
 class StackFrames::BufferTest < Minitest::Test
@@ -17,11 +18,11 @@ class StackFrames::BufferTest < Minitest::Test
   end
 
   def test_capture
-    buffer = StackFrames::Buffer.new(1)
+    buffer = StackFrames::Buffer.new(2)
     expected_line = __LINE__ + 1
     frames_length = buffer.capture
-    assert_equal(1, frames_length)
-    frame = buffer[0]
+    assert_equal(2, frames_length)
+    frame = buffer[RUBY_VERSION >= "3" ? 1 : 0]
     assert_equal('test_capture', frame.method_name)
     assert_equal(true, frame.method_name.frozen?)
     assert_equal(__FILE__, frame.path)
@@ -36,16 +37,17 @@ class StackFrames::BufferTest < Minitest::Test
     got_path = nil
     got_lineno = nil
     got_method_name = nil
+    offset = RUBY_VERSION >= "3" ? 2 : 1
     num_allocations = count_allocations do
       buffer.capture
-      frame = buffer[1]
+      frame = buffer[offset]
       got_path = frame.path
       got_lineno = frame.lineno
       got_method_name = frame.method_name
     end
-    assert_equal(0, num_allocations)
+    assert_equal(RUBY_VERSION >= "3" ? 1 : 0, num_allocations)
     assert_equal('count_allocations', got_method_name)
-    assert_equal(method(:count_allocations).source_location[1] + 1, got_lineno)
+    assert_equal(method(:count_allocations).source_location[1] + 3, got_lineno)
     assert_equal(__FILE__, got_path)
   end
 
@@ -60,6 +62,7 @@ class StackFrames::BufferTest < Minitest::Test
       ["frame1", method(:frame1).source_location[1] + 1],
       ["test_index_lookup", capture_lineno - 1],
     ].each_with_index do |(method_name, lineno), i|
+      i += 1 if RUBY_VERSION >= "3"
       frame = buffer[i]
       assert_equal(method_name, frame.method_name, "frame #{i}")
       assert_equal(lineno, frame.lineno, "frame #{i}")
@@ -109,6 +112,9 @@ class StackFrames::BufferTest < Minitest::Test
   end
 
   def count_allocations(&block)
-    StackProf.run(mode: :object, &block)[:samples]
+    yield # run the block once to warm method and cost caches
+    before = GC.stat(:total_allocated_objects)
+    yield
+    GC.stat(:total_allocated_objects) - before
   end
 end
