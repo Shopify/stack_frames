@@ -14,10 +14,6 @@ static void frame_mark(void *ptr)
     rb_gc_mark(frame->buffer);
 }
 
-static void frame_free(void *ptr)
-{
-}
-
 static size_t frame_memsize(const void *ptr)
 {
     return sizeof(frame_t);
@@ -25,7 +21,7 @@ static size_t frame_memsize(const void *ptr)
 
 const rb_data_type_t frame_data_type = {
     "stack_frames_frame",
-    { frame_mark, frame_free, frame_memsize, },
+    { frame_mark, RUBY_DEFAULT_FREE, frame_memsize, },
     NULL, NULL, RUBY_TYPED_FREE_IMMEDIATELY
 };
 
