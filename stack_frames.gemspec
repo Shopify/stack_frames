@@ -31,4 +31,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rake-compiler', '~> 1.0'
   spec.add_development_dependency "minitest", "~> 5.0"
   spec.add_development_dependency "stackprof", "~> 0.2.13"
+  spec.add_development_dependency "ruby_memcheck"
 end
