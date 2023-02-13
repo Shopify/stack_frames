@@ -115,6 +115,20 @@ class StackFrames::BufferTest < Minitest::Test
     GC.stress = false
   end
 
+  def test_frame_invalidated_from_recapture
+    buffer = StackFrames::Buffer.new(100)
+    frame1 do
+      buffer.capture
+    end
+    last_index = buffer.length - 1
+    frame = buffer[last_index]
+    buffer.capture
+    exc = assert_raises(RuntimeError) { frame.method_name }
+    assert_match(/\AStack frame is no longer valid,/, exc.message)
+    exc2 = assert_raises(RuntimeError) { frame.lineno }
+    assert_equal(exc.message, exc2.message)
+  end
+
   private
 
   def skipping_c_frames?

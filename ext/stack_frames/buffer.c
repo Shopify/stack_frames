@@ -124,15 +124,22 @@ static VALUE buffer_find(VALUE self) {
     return Qnil;
 }
 
+static void raise_frame_reference_error()
+{
+    rb_raise(rb_eRuntimeError, "Stack frame is no longer valid, its buffer was re-used for another capture");
+}
+
 VALUE stack_buffer_profile_frame(VALUE buffer_obj, int index) {
     buffer_t *buffer;
     TypedData_Get_Struct(buffer_obj, buffer_t, &buffer_data_type, buffer);
+    if (index >= buffer->length) raise_frame_reference_error();
     return buffer->profile_frames[index];
 }
 
 int stack_buffer_frame_lineno(VALUE buffer_obj, int index) {
     buffer_t *buffer;
     TypedData_Get_Struct(buffer_obj, buffer_t, &buffer_data_type, buffer);
+    if (index >= buffer->length) raise_frame_reference_error();
     return buffer->lines[index];
 }
 
